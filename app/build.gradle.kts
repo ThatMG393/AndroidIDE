@@ -40,7 +40,6 @@ android {
     }
 
     buildTypes {
-      debug { signingConfig = signingConfigs.getByName("common") }
       release { signingConfig = signingConfigs.getByName("common") }
     }
   } else {
