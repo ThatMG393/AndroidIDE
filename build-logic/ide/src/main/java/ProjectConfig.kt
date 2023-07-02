@@ -40,7 +40,7 @@ val Project.simpleVersionName: String
       return simpleVersion!!
     }
 
-    val version = "2.4.1-beta" // Hardcode
+    val version = "v2.4.1-beta" // Hardcode
     logger.warn("HARDCODED VERSION!")
     
     val regex = Regex("^v\\d+\\.?\\d+\\.?\\d+-\\w+")
