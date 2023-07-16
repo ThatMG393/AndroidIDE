@@ -40,7 +40,6 @@ android {
     }
 
     buildTypes {
-      debug { signingConfig = signingConfigs.getByName("common") }
       release { signingConfig = signingConfigs.getByName("common") }
     }
   } else {
@@ -232,7 +231,7 @@ tasks.create("generateInitScript") {
         }
     
         dependencies {
-          classpath '${BuildConfig.packageName}:gradle-plugin:${downloadVersion}'
+          classpath '${BuildConfig.packageName}:gradle-plugin:2.4.1-beta-001dee052-SNAPSHOT'
         }
       }
       

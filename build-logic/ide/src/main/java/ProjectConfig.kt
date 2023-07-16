@@ -40,7 +40,9 @@ val Project.simpleVersionName: String
       return simpleVersion!!
     }
 
-    val version = rootProject.version.toString()
+    val version = "v2.4.1-beta" // Hardcode
+    logger.warn("HARDCODED VERSION!")
+    
     val regex = Regex("^v\\d+\\.?\\d+\\.?\\d+-\\w+")
 
     simpleVersion = regex.find(version)?.value?.substring(1)?.also {
