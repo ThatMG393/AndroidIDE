@@ -28,7 +28,7 @@ releaseAssets:
 releaseTypes:
   enabled:
     - mainline
-    - internal
+    - custom
   publicationServices:
     - github
   remoteRepositories:
@@ -44,10 +44,10 @@ releaseTypes:
       matchEnvironmentVariables:
         CI: "^true$"
         ReleaseAndroidIDE: "^true$"
-    internal:
+    custom:
       description: "{{#fileContent}}build/CHANGELOG.md{{/fileContent}}"
       collapseVersions: true
-      collapsedVersionQualifier: "internal"
+      collapsedVersionQualifier: "custom"
       gitPush: false
       gitTag: false
       publish: false
