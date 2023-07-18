@@ -18,7 +18,7 @@ on:
 jobs:
   build_apk:
     name: Build APK
-    runs-on: ubuntu-latest
+    runs-on: buildjet-8vcpu-ubuntu-2204
     steps:
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.11.0
@@ -59,21 +59,6 @@ jobs:
       - name: Copy debug APK
         if: ${{ github.ref != 'refs/heads/main' }}
         run: cp app/build/outputs/apk/**/debug/*.apk ./
-      - name: Assemble Release
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: ./gradlew assembleRelease
-        env:
-          ReleaseAndroidIDE: true
-          IDE_SIGNING_ALIAS: ${{ secrets.IDE_SIGNING_ALIAS }}
-          IDE_SIGNING_AUTH_PASS: ${{ secrets.IDE_SIGNING_AUTH_PASS }}
-          IDE_SIGNING_AUTH_USER: ${{ secrets.IDE_SIGNING_AUTH_USER }}
-          IDE_SIGNING_KEY_PASS: ${{ secrets.IDE_SIGNING_KEY_PASS }}
-          IDE_SIGNING_STORE_PASS: ${{ secrets.IDE_SIGNING_STORE_PASS }}
-          IDE_SIGNING_URL: ${{ secrets.IDE_SIGNING_URL }}
-          IDE_SIGNING_KEY_BIN: ${{ secrets.IDE_SIGNING_KEY_BIN }}
-      - name: Copy release APK
-        if: ${{ github.ref == 'refs/heads/main' }}
-        run: cp app/build/outputs/apk/**/release/*.apk ./
       - name: Upload arm64-v8a-debug APK
         if: ${{ github.ref != 'refs/heads/main' }}
         uses: actions/upload-artifact@v3
