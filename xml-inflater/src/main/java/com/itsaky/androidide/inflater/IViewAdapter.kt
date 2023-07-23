@@ -17,6 +17,7 @@
 
 package com.itsaky.androidide.inflater
 
+import android.content.Context
 import android.view.View
 import com.android.SdkConstants
 import com.itsaky.androidide.inflater.internal.AttributeImpl
@@ -71,10 +72,31 @@ abstract class IViewAdapter<T : View> : AbstractParser() {
   private val attributeHandlers by lazy {
     val handlers = mutableMapOf<String, AttributeHandlerScope<T>.() -> Unit>()
     createAttrHandlers(handlers::put)
+    postCreateAttrHandlers(handlers)
     return@lazy handlers
   }
 
   private val widget by lazy { createUiWidgets() }
+
+  /**
+   * Remove the attribute handler with the given name.
+   *
+   * @param name The name of the attribute.
+   */
+  protected fun removeAttrHandler(name: String) {
+    this.attributeHandlers.remove(name)
+  }
+
+  /**
+   * Sets the attribute handler for the given name.
+   *
+   * @param name The name of the attribute.
+   * @param handler The attribute handler.
+   */
+  protected fun putAttrHandler(name: String,
+    handler: AttributeHandlerScope<T>.() -> Unit) {
+    this.attributeHandlers[name] = handler
+  }
 
   /**
    * Get the [UiWidget] model that can be used to list this adapter's view in the UI designer.
@@ -133,6 +155,7 @@ abstract class IViewAdapter<T : View> : AbstractParser() {
   protected open fun canHandleNamespace(namespace: INamespace?): Boolean {
     return this.canHandleNamespace(namespace?.uri)
   }
+
   protected open fun canHandleNamespace(nsUri: String?): Boolean {
     return SdkConstants.ANDROID_URI == nsUri
   }
@@ -167,14 +190,14 @@ abstract class IViewAdapter<T : View> : AbstractParser() {
     return (view.view as T).let {
       val file = (view as ViewImpl).file
       return@let AttributeHandlerScope(
-          it,
-          file,
-          it.context,
-          it.layoutParams,
-          attribute.namespace,
-          attribute.name,
-          attribute.value
-        )
+        it,
+        file,
+        it.context,
+        it.layoutParams,
+        attribute.namespace,
+        attribute.name,
+        attribute.value
+      )
         .let(apply)
     }
   }
@@ -187,5 +210,28 @@ abstract class IViewAdapter<T : View> : AbstractParser() {
    */
   protected open fun createAttrHandlers(
     create: (String, AttributeHandlerScope<T>.() -> Unit) -> Unit
-  ) {}
+  ) {
+  }
+
+  /**
+   * Called after the attribute handlers are created. Subclasses can use this to remove attribute
+   * handlers that are added by their superclasses.
+   *
+   * @param handlers The attribute handlers, mapped by the attribute names.
+   * @see createAttrHandlers
+   */
+  protected open fun postCreateAttrHandlers(
+    handlers: MutableMap<String, AttributeHandlerScope<T>.() -> Unit>) {
+  }
+
+  /**
+   * A hook that can be used by subclasses to create view instances for the given view [name].
+   *
+   * @param name The fully qualified class name of the view to create.
+   * @param context The Android context.
+   * @return The view instance, or `null`.
+   */
+  open fun onCreateView(name: String, context: Context): View? {
+    return null
+  }
 }
