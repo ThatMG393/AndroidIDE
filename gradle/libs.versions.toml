@@ -35,14 +35,14 @@ common-antlr4 = { module = "org.antlr:antlr4", version.ref = "antlr4" }
 common-antlr4-runtime = { module = "org.antlr:antlr4-runtime", version.ref = "antlr4" }
 common-javaparser = { module = "com.github.javaparser:javaparser-symbol-solver-core", version = "3.25.3" }
 common-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.12.0" }
-common-io = { module = "commons-io:commons-io", version = "2.12.0" }
+common-io = { module = "commons-io:commons-io", version = "2.13.0" }
 common-kotlin = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 common-jkotlin = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
 common-eventbus_ap = { module = "org.greenrobot:eventbus-annotation-processor", version = "3.3.1" }
 common-javapoet = { module = "com.squareup:javapoet", version = "1.13.0" }
 common-ksp = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
-common-jsonrpc = { module = "org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc", version = "0.20.1" }
-common-leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version = "2.11"}
+common-jsonrpc = { module = "org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc", version = "0.21.0" }
+common-leakcanary = { module = "com.squareup.leakcanary:leakcanary-android", version = "2.12"}
 common-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 common-retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 
@@ -60,7 +60,7 @@ androidx-vectors = { module = "androidx.vectordrawable:vectordrawable", version.
 androidx-animated_vectors = { module = "androidx.vectordrawable:vectordrawable-animated", version.ref = "androidx-vectordrawable" }
 androidx-ktx = { module = "androidx.core:core-ktx", version = "1.10.1" }
 androidx-fragment_ktx = { module = "androidx.fragment:fragment-ktx", version = "1.5.7" }
-androidx-lib_desugaring = { module = "com.android.tools:desugar_jdk_libs", version = "1.1.6" }
+androidx-lib_desugaring = { module = "com.android.tools:desugar_jdk_libs", version = "2.0.3" }
 androidx-splashscreen = { module = "androidx.core:core-splashscreen", version = "1.0.1" }
 androidx-transition = { module = "androidx.transition:transition-ktx", version = "1.4.1" }
 androidx-nav-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "androidx-navigation" }
@@ -74,8 +74,8 @@ google-material = { module = "com.google.android.material:material", version = "
 google-gson = { module = "com.google.code.gson:gson", version = "2.10.1" }
 google-guava = { module = "com.google.guava:guava", version = "31.1-android" }
 google-guava-jre = { module = "com.google.guava:guava", version = "31.1-jre" }
-google-auto-value-annotations = { module = "com.google.auto.value:auto-value-annotations", version = "1.10.1" }
-google-auto-value-ap = { module = "com.google.auto.value:auto-value", version = "1.10.1" }
+google-auto-value-annotations = { module = "com.google.auto.value:auto-value-annotations", version = "1.10.2" }
+google-auto-value-ap = { module = "com.google.auto.value:auto-value", version = "1.10.2" }
 google-auto-service-annotations = { module = "com.google.auto.service:auto-service-annotations", version = "1.1.1" }
 google-auto-service = { module = "com.google.auto.service:auto-service", version = "1.1.1" }
 google-oss-licenses = { module = "com.google.android.gms:play-services-oss-licenses", version = "17.0.1" }
