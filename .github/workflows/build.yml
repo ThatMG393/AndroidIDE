@@ -2,13 +2,13 @@ name: Build and test
 
 on:
   push:
-    branches: [ "dev", "main", "rework-tooling-api" ]
+    branches: [ "main" ]
     paths-ignore:
       - '**.md'
       - 'fastlane/**'
       - '.github/workflows/crowdin_contributors.yml'
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "main" ]
     paths-ignore:
       - '**.md'
       - 'fastlane/**'

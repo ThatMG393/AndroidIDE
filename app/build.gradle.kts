@@ -236,7 +236,7 @@ tasks.create("generateInitScript") {
           }
 
           dependencies {
-              classpath '${BuildConfig.packageName}:gradle-plugin:$downloadVersion'
+              classpath '${BuildConfig.packageName}:gradle-plugin:2.5.3-beta-de2341aa2-SNAPSHOT'
           }
       }
       
