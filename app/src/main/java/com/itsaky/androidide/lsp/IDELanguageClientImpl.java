@@ -70,8 +70,8 @@ import kotlin.Unit;
  */
 public class IDELanguageClientImpl implements ILanguageClient {
 
-  public static final int MAX_DIAGNOSTIC_FILES = 10;
-  public static final int MAX_DIAGNOSTIC_ITEMS_PER_FILE = 20;
+  public static final int MAX_DIAGNOSTIC_FILES = 15;
+  public static final int MAX_DIAGNOSTIC_ITEMS_PER_FILE = 35;
   protected static final ILogger LOG = ILogger.newInstance("AbstractLanguageClient");
   private static IDELanguageClientImpl mInstance;
   private final Map<File, List<DiagnosticItem>> diagnostics = new HashMap<>();

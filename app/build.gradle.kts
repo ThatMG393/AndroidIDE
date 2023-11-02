@@ -233,7 +233,7 @@ tasks.create("generateInitScript") {
           }
 
           dependencies {
-              classpath '${BuildConfig.packageName}:gradle-plugin:$downloadVersion'
+              classpath 'com.itsaky.androidide:gradle-plugin:2.5.3-beta-5b85273-SNAPSHOT'
           }
       }
       
