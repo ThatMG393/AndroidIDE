@@ -179,6 +179,7 @@ class CodeEditorView(
   fun updateFile(file: File) {
     val editor = _binding?.editor ?: return
     editor.file = file
+    postRead(file)
   }
 
   /**
@@ -330,13 +331,10 @@ class CodeEditorView(
     // This will make sure that textDocument/didOpen is sent
     binding.editor.file = file
 
-    if (context is Activity) {
-      (context as Activity).invalidateOptionsMenu()
-
-      (context as? BaseEditorActivity?)?.apply {
-        binding.bottomSheet.refreshSymbolInput(this@CodeEditorView)
-      }
-    }
+    // do not pass this editor instance
+    // symbol input must be updated for the current editor
+    (context as? BaseEditorActivity?)?.refreshSymbolInput()
+    (context as? Activity?)?.invalidateOptionsMenu()
   }
 
   private fun createLanguageServer(file: File): ILanguageServer? {

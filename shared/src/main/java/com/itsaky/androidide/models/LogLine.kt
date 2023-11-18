@@ -19,7 +19,6 @@ package com.itsaky.androidide.models
 import com.itsaky.androidide.utils.DefaultRecyclable
 import com.itsaky.androidide.utils.ILogger
 import com.itsaky.androidide.utils.LogTagUtils
-import com.itsaky.androidide.utils.RecyclableObjectPool
 import com.itsaky.androidide.utils.newRecyclableObjectPool
 
 class LogLine private constructor() : DefaultRecyclable() {
@@ -31,7 +30,7 @@ class LogLine private constructor() : DefaultRecyclable() {
   var tid: String? = null
   var tag: String? = null
   var message: String? = null
-  var priority: ILogger.Priority? = null
+  var level: ILogger.Level? = null
   var formatted = false
 
   // For JSONRpc and Recyclable
@@ -41,7 +40,7 @@ class LogLine private constructor() : DefaultRecyclable() {
 
   fun toSimpleString(): String {
     return if (formatted) String.format(
-      "%-25s %-2s %s", LogTagUtils.trimTagIfNeeded(tag, 25), ILogger.priorityChar(priority),
+      "%-25s %-2s %s", LogTagUtils.trimTagIfNeeded(tag, 25), level?.levelChar ?: 'U',
       message) else unformatted!!
   }
 
@@ -58,7 +57,7 @@ class LogLine private constructor() : DefaultRecyclable() {
     time = null
     date = null
     unformatted = null
-    priority = ILogger.Priority.DEBUG
+    level = ILogger.Level.DEBUG
     formatted = false
   }
 
@@ -70,7 +69,7 @@ class LogLine private constructor() : DefaultRecyclable() {
   override fun toString(): String {
     return if (formatted) String.format(
       "%s %s %s %s %-2s %-25s %s",
-      date, time, pid, tid, ILogger.priorityChar(priority), LogTagUtils.trimTagIfNeeded(tag, 25),
+      date, time, pid, tid, level?.levelChar ?: 'U', LogTagUtils.trimTagIfNeeded(tag, 25),
       message) else unformatted!!
   }
 
@@ -85,7 +84,7 @@ class LogLine private constructor() : DefaultRecyclable() {
     if (tid != other.tid) return false
     if (tag != other.tag) return false
     if (message != other.message) return false
-    if (priority != other.priority) return false
+    if (level != other.level) return false
     if (formatted != other.formatted) return false
 
     return true
@@ -99,7 +98,7 @@ class LogLine private constructor() : DefaultRecyclable() {
     result = 31 * result + (tid?.hashCode() ?: 0)
     result = 31 * result + (tag?.hashCode() ?: 0)
     result = 31 * result + (message?.hashCode() ?: 0)
-    result = 31 * result + (priority?.hashCode() ?: 0)
+    result = 31 * result + (level?.hashCode() ?: 0)
     result = 31 * result + formatted.hashCode()
     return result
   }
@@ -115,10 +114,10 @@ class LogLine private constructor() : DefaultRecyclable() {
 
     @JvmOverloads
     @JvmStatic
-    fun obtain(priority: ILogger.Priority?, tag: String?, message: String?,
+    fun obtain(level: ILogger.Level?, tag: String?, message: String?,
       formatted: Boolean = true): LogLine {
       val logLine = logLinePool.obtain()
-      logLine.priority = priority
+      logLine.level = level
       logLine.tag = tag
       logLine.message = message
       logLine.formatted = formatted
@@ -133,7 +132,7 @@ class LogLine private constructor() : DefaultRecyclable() {
       val logLine = logLinePool.obtain()
       try {
         val split = log.split("\\s".toRegex(), limit = 7).toTypedArray()
-        logLine.priority = ILogger.priority(split[4][0].uppercaseChar())
+        logLine.level = ILogger.Level.forChar(split[4][0])
         logLine.date = split[0]
         logLine.time = split[1] // time
         logLine.pid = split[2] // process id

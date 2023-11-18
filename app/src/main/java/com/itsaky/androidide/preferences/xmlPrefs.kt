@@ -49,6 +49,7 @@ import com.itsaky.androidide.preferences.internal.splitAttributes
 import com.itsaky.androidide.preferences.internal.splitAttributesIndentSize
 import com.itsaky.androidide.preferences.internal.trimFinalNewLine
 import com.itsaky.androidide.preferences.internal.trimTrailingWhitespace
+import kotlinx.parcelize.IgnoredOnParcel
 import org.eclipse.lemminx.dom.builder.EmptyElements
 import kotlinx.parcelize.Parcelize
 
@@ -225,9 +226,11 @@ private class EmptyElementsBehavior(
   override val title: Int = string.idepref_emptyElements_title,
   override val summary: Int? = string.idepref_emptyElements_summary
 ) : SingleChoicePreference() {
+
+  @IgnoredOnParcel
   override val dialogCancellable = true
 
-  override fun getSelectedItem(): Int {
+  override fun getInitiallySelectionItemPosition(context: Context): Int {
     return EmptyElements.valueOf(emptyElementsBehavior).ordinal
   }
 
@@ -235,7 +238,7 @@ private class EmptyElementsBehavior(
     return EmptyElements.values().map { it.toString() }.toTypedArray()
   }
 
-  override fun onItemSelected(position: Int, isSelected: Boolean) {
+  override fun onChoiceConfirmed(position: Int) {
     emptyElementsBehavior = EmptyElements.values()[position].toString()
   }
 }

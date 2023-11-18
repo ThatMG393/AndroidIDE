@@ -23,21 +23,26 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 /**
  * A preference with multiple choices to select from.
  *
+ * The [onSelectionChanged] is called whenever the
+ * [DialogInterface.OnMultiChoiceClickListener][android.content.DialogInterface.OnMultiChoiceClickListener]
+ * is called.
+ *
  * @author Akash Yadav
  */
-abstract class MultiChoicePreference : DialogPreference(), PreferenceChoices {
+abstract class MultiChoicePreference : ChoiceBasedDialogPreference(), PreferenceChoices {
 
-  /**
-   * Get the index of all the items that should be selected by default.
-   * @see MaterialAlertDialogBuilder.setMultiChoiceItems
-   */
-  abstract fun getCheckedItems(): BooleanArray
+  override fun onConfigureDialogChoices(
+    preference: Preference,
+    dialog: MaterialAlertDialogBuilder,
+    choices: Array<String>,
+    checkedItems: BooleanArray?
+  ) {
 
-  override fun onConfigureDialog(preference: Preference, dialog: MaterialAlertDialogBuilder) {
-    super.onConfigureDialog(preference, dialog)
-    dialog.setMultiChoiceItems(getChoices(preference.context), getCheckedItems()) { _, which, checked ->
-      onItemSelected(which, checked)
+    dialog.setMultiChoiceItems(
+      choices,
+      checkedItems!!
+    ) { _, which, checked ->
+      onSelectionChanged(which, checked)
     }
-    dialog.setPositiveButton(android.R.string.ok, null)
   }
 }

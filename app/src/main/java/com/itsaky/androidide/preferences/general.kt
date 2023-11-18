@@ -22,18 +22,25 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.Preference
 import com.itsaky.androidide.R
 import com.itsaky.androidide.preferences.internal.CONFIRM_PROJECT_OPEN
-import com.itsaky.androidide.preferences.internal.ENABLE_MATERIAL_YOU
 import com.itsaky.androidide.preferences.internal.OPEN_PROJECTS
+import com.itsaky.androidide.preferences.internal.SELECTED_LOCALE
+import com.itsaky.androidide.preferences.internal.SELECTED_THEME
 import com.itsaky.androidide.preferences.internal.TERMINAL_USE_SYSTEM_SHELL
 import com.itsaky.androidide.preferences.internal.UI_MODE
 import com.itsaky.androidide.preferences.internal.autoOpenProjects
 import com.itsaky.androidide.preferences.internal.confirmProjectOpen
-import com.itsaky.androidide.preferences.internal.enableMaterialYou
+import com.itsaky.androidide.preferences.internal.selectedLocale
+import com.itsaky.androidide.preferences.internal.selectedTheme
 import com.itsaky.androidide.preferences.internal.uiMode
 import com.itsaky.androidide.preferences.internal.useSystemShell
 import com.itsaky.androidide.resources.R.drawable
 import com.itsaky.androidide.resources.R.string
+import com.itsaky.androidide.resources.localization.LocaleProvider
+import com.itsaky.androidide.ui.themes.IDETheme
+import com.itsaky.androidide.ui.themes.ThemeManager
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import java.util.Locale
 
 @Parcelize
 class GeneralPreferences(
@@ -42,6 +49,7 @@ class GeneralPreferences(
   override val summary: Int? = string.idepref_general_summary,
   override val children: List<IPreference> = mutableListOf()
 ) : IPreferenceScreen() {
+
   init {
     addPreference(InterfaceConfig())
     addPreference(ProjectConfig())
@@ -55,9 +63,11 @@ class InterfaceConfig(
   override val title: Int = string.title_interface,
   override val children: List<IPreference> = mutableListOf(),
 ) : IPreferenceGroup() {
+
   init {
     addPreference(UiMode())
-    addPreference(EnableMaterialYou())
+    addPreference(ThemeSelector())
+    addPreference(LocaleSelector())
   }
 }
 
@@ -67,6 +77,7 @@ class ProjectConfig(
   override val title: Int = R.string.idepref_general_projectConfig,
   override val children: List<IPreference> = mutableListOf(),
 ) : IPreferenceGroup() {
+
   init {
     addPreference(OpenLastProject())
     addPreference(ConfirmProjectOpen())
@@ -79,6 +90,7 @@ class TerminalConfig(
   override val title: Int = R.string.title_terminal,
   override val children: List<IPreference> = mutableListOf(),
 ) : IPreferenceGroup() {
+
   init {
     addPreference(UseSytemShell())
   }
@@ -91,6 +103,8 @@ class UiMode(
   override val summary: Int? = R.string.idepref_general_uiMode_summary,
   override val icon: Int? = R.drawable.ic_ui_mode
 ) : SingleChoicePreference() {
+
+  @IgnoredOnParcel
   override val dialogCancellable = true
 
   override fun getChoices(context: Context): Array<String> {
@@ -101,7 +115,7 @@ class UiMode(
     )
   }
 
-  override fun getSelectedItem(): Int {
+  override fun getInitiallySelectionItemPosition(context: Context): Int {
     return when (uiMode) {
       AppCompatDelegate.MODE_NIGHT_NO -> 0
       AppCompatDelegate.MODE_NIGHT_YES -> 1
@@ -109,26 +123,74 @@ class UiMode(
     }
   }
 
-  override fun onItemSelected(position: Int, isSelected: Boolean) {
-    if (isSelected) {
-      val mode =
-        when (position) {
-          0 -> AppCompatDelegate.MODE_NIGHT_NO
-          1 -> AppCompatDelegate.MODE_NIGHT_YES
-          else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        }
-      uiMode = mode
+  override fun onChoiceConfirmed(position: Int) {
+    uiMode = when (position) {
+      0 -> AppCompatDelegate.MODE_NIGHT_NO
+      1 -> AppCompatDelegate.MODE_NIGHT_YES
+      else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
     }
   }
 }
 
 @Parcelize
-class EnableMaterialYou(
-  override val key: String = ENABLE_MATERIAL_YOU,
-  override val title: Int = R.string.idepref_general_materialYou,
-  override val summary: Int? = R.string.idepref_general_materialYou_summary,
+class ThemeSelector(
+  override val key: String = SELECTED_THEME,
+  override val title: Int = R.string.idepref_general_themeSelector_title,
+  override val summary: Int? = R.string.idepref_general_themeSelector_summary,
   override val icon: Int? = R.drawable.ic_color_scheme
-) : SwitchPreference(setValue = ::enableMaterialYou::set, getValue = ::enableMaterialYou::get)
+) : SingleChoicePreference() {
+
+  @IgnoredOnParcel
+  private val themes = IDETheme.values()
+
+  override fun getChoices(context: Context): Array<String> {
+    return themes.map { context.getString(it.title) }.toTypedArray()
+  }
+
+  override fun getInitiallySelectionItemPosition(context: Context): Int {
+    return themes.indexOf(ThemeManager.getCurrentTheme())
+  }
+
+  override fun onChoiceConfirmed(position: Int) {
+    selectedTheme = themes[position].name
+  }
+}
+
+@Parcelize
+class LocaleSelector(
+  override val key: String = SELECTED_LOCALE,
+  override val title: Int = R.string.idepref_general_localeSelector_title,
+  override val summary: Int? = R.string.idepref_general_localeSelector_summary,
+  override val icon: Int? = R.drawable.ic_translate
+) : SingleChoicePreference() {
+  
+  @IgnoredOnParcel
+  private val locales: Array<String>? = null
+
+  override fun getChoices(context: Context): Array<String> {
+    return locales ?: mutableListOf<String>().apply { 
+      add(context.getString(R.string.locale_system_default))
+      
+      LocaleProvider.SUPPORTED_LOCALES.map {
+        val locale = Locale.forLanguageTag(it)
+        locale.getDisplayName(locale)
+      }.also { addAll(it) }
+    }.toTypedArray()
+  }
+
+  override fun getInitiallySelectionItemPosition(context: Context): Int {
+    val applicationLocales = AppCompatDelegate.getApplicationLocales()
+    val locale = if (applicationLocales.size() > 0) {
+      applicationLocales.get(0)!!.language
+    } else selectedLocale ?: return 0 // Use system default if not set
+    return LocaleProvider.SUPPORTED_LOCALES.indexOf(locale) + 1
+  }
+
+  override fun onChoiceConfirmed(position: Int) {
+    // Reset to null if 'System Default' is selected
+    selectedLocale = if (position == 0) null else LocaleProvider.SUPPORTED_LOCALES[position - 1]
+  }
+}
 
 @Parcelize
 class OpenLastProject(

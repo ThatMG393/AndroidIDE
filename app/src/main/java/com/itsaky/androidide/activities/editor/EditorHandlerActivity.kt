@@ -21,12 +21,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
-import android.util.SparseArray
 import android.view.Menu
 import android.view.MenuItem
 import android.view.ViewGroup.LayoutParams
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.core.util.forEach
+import androidx.collection.MutableIntObjectMap
 import androidx.core.view.GravityCompat
 import com.blankj.utilcode.util.ImageUtils
 import com.blankj.utilcode.util.ThreadUtils
@@ -414,31 +413,43 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
   }
 
   override suspend fun saveAllResult(progressConsumer: ((Int, Int) -> Unit)?): SaveResult {
+    setFilesSaving(true)
     val result = SaveResult()
     for (i in 0 until editorViewModel.getOpenedFileCount()) {
-      saveResult(i, result)
+      saveResultInternal(i, result, false)
       progressConsumer?.invoke(i + 1, editorViewModel.getOpenedFileCount())
     }
+    setFilesSaving(false)
     return result
   }
 
   override suspend fun saveResult(index: Int, result: SaveResult) {
+    saveResultInternal(index, result, true)
+  }
+
+  private suspend fun saveResultInternal(index: Int, result: SaveResult, updateSaving: Boolean) {
     if (index < 0 || index >= editorViewModel.getOpenedFileCount()) {
       return
     }
 
     val frag = getEditorAtIndex(index) ?: return
-    if (frag.file == null) {
-      return
+    val fileName = frag.file?.name ?: return
+
+    if (updateSaving) {
+      setFilesSaving(true)
     }
 
     run {
       // Must be called before frag.save()
       // Otherwise, it'll always return false
       val modified = frag.isModified
-      frag.save()
+      if (!frag.save()) {
+        if (updateSaving) {
+          setFilesSaving(false)
+        }
+        return
+      }
 
-      val fileName = frag.file!!.name
       val isGradle = fileName.endsWith(".gradle") || fileName.endsWith(".gradle.kts")
       val isXml: Boolean = fileName.endsWith(".xml")
       if (!result.gradleSaved) {
@@ -459,13 +470,26 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
     val finalModified = modified
 
     withContext(Dispatchers.Main) {
-      editorViewModel.setFilesModified(finalModified)
+      editorViewModel.apply {
+        setFilesModified(finalModified)
+      }
+
+      if (updateSaving) {
+        setFilesSaving(false)
+      }
 
       // set tab as unmodified
       val tab = binding.tabs.getTabAt(index) ?: return@withContext
       if (tab.text!!.startsWith('*')) {
         tab.text = tab.text!!.substring(startIndex = 1)
       }
+    }
+  }
+
+  private suspend fun setFilesSaving(saving: Boolean) {
+    withContext(Dispatchers.Main.immediate) {
+      invalidateOptionsMenu()
+      editorViewModel.setFilesSaving(saving)
     }
   }
 
@@ -476,6 +500,10 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
 
   override fun areFilesModified(): Boolean {
     return editorViewModel.areFilesModified()
+  }
+
+  override fun areFilesSaving(): Boolean {
+    return editorViewModel.areFilesSaving()
   }
 
   override fun closeFile(index: Int, runAfter: () -> Unit) {
@@ -642,7 +670,7 @@ open class EditorHandlerActivity : ProjectHandlerActivity(), IEditorHandler {
     executeAsyncProvideError({
       val files = editorViewModel.getOpenedFiles()
       val dupliCount = mutableMapOf<String, Int>()
-      val names = SparseArray<String>()
+      val names = MutableIntObjectMap<String>()
       val nameBuilder = UniqueNameBuilder<File>("", File.separator)
 
       files.forEach {

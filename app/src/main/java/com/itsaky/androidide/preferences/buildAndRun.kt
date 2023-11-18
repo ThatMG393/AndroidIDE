@@ -48,6 +48,7 @@ import com.itsaky.androidide.utils.flashError
 import com.itsaky.androidide.utils.flashSuccess
 import kotlinx.parcelize.Parcelize
 import java.io.File
+import kotlin.reflect.KMutableProperty0
 
 @Parcelize
 class BuildAndRunPreferences(
@@ -74,7 +75,9 @@ private class GradleOptions(
     addPreference(GradleCommands())
     addPreference(GradleDistrubution())
     addPreference(GradleClearCache())
-    if (IDEBuildConfigProvider.getInstance().isArm64v8aBuild() && VERSION.SDK_INT == VERSION_CODES.R) {
+    if (IDEBuildConfigProvider.getInstance()
+        .isArm64v8aBuild() && VERSION.SDK_INT == VERSION_CODES.R
+    ) {
       addPreference(TagPointersFix())
     }
   }
@@ -86,42 +89,18 @@ private class GradleCommands(
   override val title: Int = string.idepref_build_customgradlecommands_title,
   override val summary: Int? = string.idepref_build_customgradlecommands_summary,
   override val icon: Int? = drawable.ic_bash_commands,
-) : MultiChoicePreference() {
+) : PropertyBasedMultiChoicePreference() {
 
-  override fun getCheckedItems(): BooleanArray {
-    return booleanArrayOf(
-      isStacktraceEnabled,
-      isInfoEnabled,
-      isDebugEnabled,
-      isScanEnabled,
-      isWarningModeAllEnabled,
-      isBuildCacheEnabled,
-      isOfflineEnabled
+  override fun getProperties(): Map<String, KMutableProperty0<Boolean>> {
+    return linkedMapOf(
+      "--stacktrace" to ::isStacktraceEnabled,
+      "--info" to ::isInfoEnabled,
+      "--debug" to ::isDebugEnabled,
+      "--scan" to ::isScanEnabled,
+      "--warning-mode all" to ::isWarningModeAllEnabled,
+      "--build-cache" to ::isBuildCacheEnabled,
+      "--offline" to ::isOfflineEnabled,
     )
-  }
-
-  override fun getChoices(context: Context): Array<String> {
-    return arrayOf(
-      "--stacktrace",
-      "--info",
-      "--debug",
-      "--scan",
-      "--warning-mode all",
-      "--build-cache",
-      "--offline"
-    )
-  }
-
-  override fun onItemSelected(position: Int, isSelected: Boolean) {
-    when (position) {
-      0 -> isStacktraceEnabled = isSelected
-      1 -> isInfoEnabled = isSelected
-      2 -> isDebugEnabled = isSelected
-      3 -> isScanEnabled = isSelected
-      4 -> isWarningModeAllEnabled = isSelected
-      5 -> isBuildCacheEnabled = isSelected
-      6 -> isOfflineEnabled = isSelected
-    }
   }
 }
 
